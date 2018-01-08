@@ -1,0 +1,46 @@
+#-------------------------------------------
+#change yaml extenstion to yml
+#-------------------------------------------
+
+require 'rake'
+require 'fileutils'
+desc "changes files extenstion from yaml to yml"
+
+task :cleanyml do
+Dir.glob('/home/dvir/Desktop/VisualCode/play/*.yaml') do |yaml_file|
+  puts yaml_file
+  FileUtils.mv(yaml_file, yaml_file.ext("yml"))
+end
+end
+
+
+#-------------------------------------------
+#tar all files rake task
+#-------------------------------------------
+
+#rake archive PATH=/home/user/my_archive EXCLUDE=.tmp,.bkp
+require 'rake/packagetask'
+desc 'archive the folder content to a tar file'
+task :folderzip do
+ 
+  path = ENV["PATH"]
+  exclude = ENV["EXCLUDE"]
+  target = path+'/build'
+  mkdir path+'/build' unless Dir.exists?(target)
+
+  files = Dir["#{path}/*"]
+
+    files.each do |file|
+    
+    file_isfolder = File.directory?(file)
+    file_base = File.basename(file)
+    file_ext = File.extname(file) if !file_isfolder
+    excluded_list = exclude.split(",")
+
+    Rake::PackageTask.new("archive", "1.0") do |p|
+      p.need_tar_gz = true
+      p.package_dir = build
+      p.package_files << file_base if !(excluded_list.include?(file_ext))    
+    end
+  end
+end
